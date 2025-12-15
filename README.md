@@ -17,7 +17,7 @@ It focuses on sales performance, customer analytics, and YoY growth insights.
 
 ## 🧠 Key Insights
 - West region contributes the highest sales
-- Corporate segment shows higher average order value
+- Consumer segment holds 50% of total sales
 - Top customers generate a significant share of revenue
 - YoY sales growth indicates business performance trend
 
