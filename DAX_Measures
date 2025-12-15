@@ -1,0 +1,164 @@
+/***********************
+ CALCULATED COLUMNS
+***********************/
+
+-- Order Year
+Order Year =
+YEAR(Sales[Order_Date])
+
+-- Order Month (Year-Month)
+Order Month =
+FORMAT(Sales[Order_Date], "YYYY-MM")
+
+-- Order Month Start Date (for clean line charts)
+Order Month Start =
+DATE(
+    YEAR(Sales[Order_Date]),
+    MONTH(Sales[Order_Date]),
+    1
+)
+
+-- Order Quarter
+Order Quarter =
+"Q" & FORMAT(Sales[Order_Date], "Q")
+
+-- Delivery Days (Shipping Performance)
+Delivery Days =
+DATEDIFF(
+    Sales[Order_Date],
+    Sales[Ship_Date],
+    DAY
+)
+
+
+/***********************
+ BASIC KPI MEASURES
+***********************/
+
+-- Total Sales
+Total Sales =
+SUM(Sales[Sales])
+
+-- Total Orders
+Total Orders =
+DISTINCTCOUNT(Sales[Order_ID])
+
+-- Total Customers
+Total Customers =
+DISTINCTCOUNT(Sales[Customer_ID])
+
+-- Average Order Value (AOV)
+Average Order Value =
+DIVIDE(
+    [Total Sales],
+    [Total Orders]
+)
+
+-- Orders per Customer
+Orders per Customer =
+DIVIDE(
+    [Total Orders],
+    [Total Customers]
+)
+
+-- Average Delivery Days
+Average Delivery Days =
+AVERAGE(Sales[Delivery Days])
+
+
+/***********************
+ CUSTOMER ANALYTICS MEASURES
+***********************/
+
+-- Customer Total Sales (Customer Lifetime Value - basic)
+Customer Total Sales =
+CALCULATE(
+    [Total Sales],
+    ALLEXCEPT(Sales, Sales[Customer_ID])
+)
+
+-- Customer Order Count
+Customer Order Count =
+CALCULATE(
+    DISTINCTCOUNT(Sales[Order_ID]),
+    ALLEXCEPT(Sales, Sales[Customer_ID])
+)
+
+-- Customer Average Order Value
+Customer AOV =
+DIVIDE(
+    [Customer Total Sales],
+    [Customer Order Count]
+)
+
+
+/***********************
+ TIME INTELLIGENCE (YoY)
+***********************/
+
+-- Total Sales Last Year
+Total Sales LY =
+CALCULATE(
+    [Total Sales],
+    SAMEPERIODLASTYEAR(Sales[Order_Date])
+)
+
+-- Year-over-Year Growth %
+YoY Growth % =
+DIVIDE(
+    [Total Sales] - [Total Sales LY],
+    [Total Sales LY]
+)
+
+-- YoY Target (for KPI visual)
+YoY Target = 0
+-- Alternative target example:
+-- YoY Target = 0.10
+
+
+/***********************
+ PRODUCT ANALYTICS MEASURES
+***********************/
+
+-- Product Sales
+Product Sales =
+SUM(Sales[Sales])
+
+-- Product % Contribution to Total Sales
+Product % of Total =
+DIVIDE(
+    [Product Sales],
+    [Total Sales]
+)
+
+-- Product Rank by Sales
+Product Rank by Sales =
+RANKX(
+    ALLSELECTED(Sales[Product_Name]),
+    [Product Sales],
+    ,
+    DESC,
+    DENSE
+)
+
+-- Top 10 Product Filter
+Is Top 10 Product =
+IF(
+    [Product Rank by Sales] <= 10,
+    1,
+    0
+)
+
+
+/***********************
+ PRESENTATION / UX MEASURES
+***********************/
+
+-- Dynamic Page Title
+Page Title =
+"Sales Dashboard - " &
+IF(
+    HASONEVALUE(Sales[Region]),
+    SELECTEDVALUE(Sales[Region]),
+    "All Regions"
+)
